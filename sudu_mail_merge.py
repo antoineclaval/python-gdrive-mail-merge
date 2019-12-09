@@ -159,20 +159,20 @@ if __name__ == '__main__':
     # get row data, then loop through & process each form letter
     dataDict = _get_sheets_data(SHEETS, targetMovie) # get data from data source for targetMovie
   #  print(dataDict)
-    print(dataDict[0][0])
-    print(dataDict[3])
+    # print(dataDict[0][0])
+    # print(dataDict[3])
 
-    inscriptionsListString, refusalListString, acceptanceListString  = "" , "", ""
+    inscriptionsListString, refusalListString, acceptanceListString , projectionListString  = "" , "", "" , ""
     currentMonthLine = []
 
 
     for i in dataDict:
+        print(i)
         if  i :
             if  targetMonth in i[1]:
-                print(i)
-                inscriptionsListString += "- " +  i[0] + " (" + i[4] + ")\n"
+                inscriptionsListString += i[0] + " (" + i[4] + ")\n"
                 currentMonthLine.append(i)
-            if targetMonth in i[3]:
+            if i[3] and targetMonth in i[3]:
                 if( "REFUSÉ" == i[2]):
                     refusalListString += "- " + (i[0] + " (" + i[4] + ")\n")
                 elif ( "SÉLECTIONNÉ" ==  i[2]):
@@ -180,21 +180,23 @@ if __name__ == '__main__':
 
 
 
-    print ("- Inscription : ", len(currentMonthLine))
+    print ("Inscription : ", len(currentMonthLine))
 
     if ( not inscriptionsListString ) :
-        inscriptionsListString = " Pas encore"
+        inscriptionsListString = "Pas encore"
 
     if ( not refusalListString  ) :
-        refusalListString = "- Pas encore"
+        refusalListString = "Pas encore"
 
     if ( not acceptanceListString ) :
-        acceptanceListString = "- Pas encore"
+        acceptanceListString = "Pas encore"
 
 
     merge.update(dict({"INSCRIPTIONS_LIST" : inscriptionsListString}))
     merge.update(dict({"SELECTIONS_LIST" : acceptanceListString}))
     merge.update(dict({"REJECTIONS_LIST" : refusalListString}))
+    merge.update(dict({"PROJECTIONS_LIST" : projectionListString}))
+    
 
     print('Merged letter %d: docs.google.com/document/d/%s/edit' % (1, merge_template(DOCS_FILE_ID, SOURCE, DRIVE)))
 # [END mail_merge_python]
