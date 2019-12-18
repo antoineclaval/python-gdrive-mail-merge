@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
         'MOVIE_NAME' : targetMovie,
         # movie independant data 
-        'CURRENT_DATE': time.strftime('%Y %B %d'),
+        'CURRENT_DATE': time.strftime('%d %B %Y'),
         'TARGET_MONTH':targetMonth,
         'TARGET_YEAR':targetYear,
         # - - - - - - - - - - - - - - - - - - - - - - - - - -
