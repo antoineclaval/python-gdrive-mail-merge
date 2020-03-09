@@ -5,3 +5,6 @@ The final goal is to automate a report generation process that is currently manu
 Draw heavily from the great quality doc bellow:
 https://developers.google.com/docs/api/samples/mail-merge
 
+# running it
+source env/bin/activate
+sh all_gen.sh 

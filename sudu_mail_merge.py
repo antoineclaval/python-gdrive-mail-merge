@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+
+# tasrgetMonth 
+# template
+# location of file
+# locale pour date
+# Pas encore localisé
+
 """
 docs-mail-merge.py (Python 2.x or 3.x)
 Google Docs (REST) API mail-merge sample app
@@ -26,10 +34,14 @@ from oauth2client import file, client, tools
 
 # Localized Date Settings
 locale.setlocale(locale.LC_TIME, "fr_FR")
+#locale.setlocale(locale.LC_TIME, "en_EN")
+
 
 # Fill-in IDs of your Docs template & any Sheets data source
-DOCS_FILE_ID = '1UlFsfrDn4QXsdcsTrMZkmz8SXD5tvTVioHWQMBaNtQA'
-SHEETS_FILE_ID = '1vvktOMS-GYFh9KFRo-0ZTAm47PP9t9FF45RAVvy8zac'
+#DOCS_FILE_ID = '1UlFsfrDn4QXsdcsTrMZkmz8SXD5tvTVioHWQMBaNtQA' # template FR 
+DOCS_FILE_ID = '1Q1mLBIKvrFZN_mmB4212mKtHfYMJ0YLIO9qEgG5SRpc' # template EN 
+
+SHEETS_FILE_ID = '1Z7JeL6zrPeDYei6di0djFQvpW98GcXou30BU3y4MMOk' # data
 
 # authorization constants
 CLIENT_ID_FILE = 'credentials.json'
@@ -73,6 +85,7 @@ def get_data(source):
             source, SOURCES))
     return SAFE_DISPATCH[source]()
 
+# Here plug call to db , formatted in a way similar to spreadsheet.range
 def _get_sheets_data(service=SHEETS, range="Sheet1"):
     """(private) Returns data from Google Sheets source. It gets all rows of
         'Sheet1' (the default Sheet in a new spreadsheet), but drops the first
@@ -88,7 +101,7 @@ def _copy_template(tmpl_id, source, service):
     """(private) Copies letter template document using Drive API then
         returns file ID of (new) copy.
     """
-    body = {'name': F'{targetMovie} - {targetMonth} {targetYear}'}
+    body = {'name': F'{targetMovie} - {targetMonth} {targetYear}', 'parents' : ['1LSVQGX_QHQEBDELdUrpBL0Ix7qKujtiP']}
 
     return service.files().copy(body=body, fileId=tmpl_id,
             fields='id').execute().get('id')
@@ -101,8 +114,6 @@ def merge_template(tmpl_id, source, service):
     copy_id = _copy_template(tmpl_id, source, service)
     context = merge.iteritems() if hasattr({}, 'iteritems') else merge.items()
 
-    print ("--- context ---")
-    print ( context)
 
     # "search & replace" API requests for mail merge substitutions
     reqs = [{'replaceAllText': {
@@ -114,8 +125,7 @@ def merge_template(tmpl_id, source, service):
             }} for key, value in context]
 
 
-    print ( "request :")
-    print (reqs)
+    #print (reqs)
     # send requests to Docs API to do actual merge
     DOCS.documents().batchUpdate(body={'requests': reqs}, documentId=copy_id, fields='').execute()
     return copy_id
@@ -144,7 +154,7 @@ if __name__ == '__main__':
         'MOVIE_NAME' : targetMovie,
         # movie independant data 
         'CURRENT_DATE': time.strftime('%d %B %Y'),
-        'TARGET_MONTH':targetMonth,
+        'TARGET_MONTH':"January",
         'TARGET_YEAR':targetYear,
         # - - - - - - - - - - - - - - - - - - - - - - - - - -
         # Report data, gathered in MOVIE_NAME Sheet
@@ -165,31 +175,32 @@ if __name__ == '__main__':
     inscriptionsListString, refusalListString, acceptanceListString , projectionListString  = "" , "", "" , ""
     currentMonthLine = []
 
-
-    for i in dataDict:
-        print(i)
-        if  i :
-            if  targetMonth in i[1]:
-                inscriptionsListString += i[0] + " (" + i[4] + ")\n"
-                currentMonthLine.append(i)
-            if i[3] and targetMonth in i[3]:
-                if( "REFUSÉ" == i[2]):
-                    refusalListString += "- " + (i[0] + " (" + i[4] + ")\n")
-                elif ( "SÉLECTIONNÉ" ==  i[2]):
-                    acceptanceListString += "- " + (i[0] + " (" + i[4] + ")\n")
-
+    try:
+        for i in dataDict:
+            if  i :
+                if  targetMonth in i[1]:
+                    inscriptionsListString += i[0] + " (" + i[4] + ")\n"
+                    currentMonthLine.append(i)
+                if i[3] and targetMonth in i[3]:
+                    if( "REFUSÉ" == i[2]):
+                        refusalListString += "- " + (i[0] + " (" + i[4] + ")\n")
+                    elif ( "SÉLECTIONNÉ" ==  i[2]):
+                        acceptanceListString += "- " + (i[0] + " (" + i[4] + ")\n")
+    except IndexError:
+        print("error : \n")
+        print( i ) 
 
 
     print ("Inscription : ", len(currentMonthLine))
 
     if ( not inscriptionsListString ) :
-        inscriptionsListString = "Pas encore"
+        inscriptionsListString = "Not yet"
 
     if ( not refusalListString  ) :
-        refusalListString = "Pas encore"
+        refusalListString = "Not yet"
 
     if ( not acceptanceListString ) :
-        acceptanceListString = "Pas encore"
+        acceptanceListString = "Not yet"
 
 
     merge.update(dict({"INSCRIPTIONS_LIST" : inscriptionsListString}))
